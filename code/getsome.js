@@ -6,13 +6,22 @@ var board = 'b';
 
 var request = require('request');
 var fs = require('fs');
+var async = require('async');
 // var path = require('path');
 
-function getImg(post){
+function getImg(post, cb){
     // console.log(img);
     var addr = "http://i.4cdn.org/" + board + "/" + post.tim + post.ext; 
     console.log(addr);
-    request(addr).pipe(fs.createWriteStream('/data/images/' + post.filename + post.ext));
+    // request(addr).pipe(fs.createWriteStream('/data/images/' + post.filename + post.ext));
+
+    var picStream = fs.createWriteStream('/data/images/' + post.filename + post.ext);
+    picStream.on('close', function() {
+        console.log('file done');
+        cb(null, post);
+    });
+    request(addr).pipe(picStream); 
+
 }
 
 function allThreads(board, callback){
@@ -23,7 +32,7 @@ function allThreads(board, callback){
         //     threads = threads.concat(parsed[a].threads);
         // }
         threads = threads.concat(parsed[0].threads);
-            callback(threads);
+        callback(threads);
     });
 
 }
@@ -31,48 +40,49 @@ function allThreads(board, callback){
 function posts(board, thread, callback){
     request('http://a.4cdn.org/' + board + '/thread/' + thread.no +'.json', function(error, response, body){
         var parsed = JSON.parse(body);
-        posts = parsed.posts;
+        var posts = parsed.posts;
         iposts = Array();
         for(a in posts){
             // console.log(posts[a]);
             // should do some analasys here
 
+            // if the post has an image
             if(posts[a].tim){
                 // getImg(posts[a]);
                 iposts = iposts.concat(posts[a]);
                 // var uurl = posts[a].tim + posts[a].ext;
+                // console.log(iposts.length);
             }
-            callback(iposts);
         }
+        // workaround to get it to run after the for loop is completed
+        setTimeout(function(){
+            callback(iposts);
+        },0);
     });
 
 }
 
 allThreads('b', function(tlist){
 
-    // for(i in tlist){
-    var i = 0;
-        posts('b', tlist[i], function(r){
-            for(i in r){
-                post = r[i];
-                console.log(post);
-                getImg(post);
-            }
+    // go thourgh all the threads in post and download the image
+    for(i in tlist){
+    // var i = 0;
+        posts('b', tlist[i], function(posts){
+            // for(j in posts){
+                // var post = posts[j];
+                // console.log("num posts:");
+                console.log(posts.length);
+                // console.log(post.no);
+                // getImg(post);
+                async.eachSeries(posts, function iterator(post, callback) {
+                    console.log(post.no);
+                    getImg(post, callback);
+                });
+
+            // }
 
         });
-    // }
+    }
 
-    // get all thread contents yes
 });
-        // for(a in first.threads){
-        //     var url = "http://i.4cdn.org/b/" + first.threads[a].tim + first.threads[a].ext;
-        //     var filename = first.threads[a].filename + first.threads[a].ext;
-        //     var img = {
-        //         url: url,
-        //         filename: filename
-        //     }
-        //
-        //     callback(parsed);
-        //     // getImg(img);
-        //
-        // }
+
