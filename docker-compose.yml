@@ -13,6 +13,6 @@ node:
   volumes_from:
     - data
     - cache
-  ports:
-    - "7070:7070"
+  # ports:
+  #   - "7070:7070"
   working_dir: /usr/src/myapp
