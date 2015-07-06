@@ -1,2 +1,5 @@
 *.swp
 /cache/images
+/cache
+code/node_modules
+*.mwb*
