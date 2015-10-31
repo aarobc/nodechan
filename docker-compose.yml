@@ -1,18 +1,28 @@
-data:  
-  build: dfiles/data
+code:
+  image: busybox
   volumes:
-    - code:/usr/src/myapp
+    - ./code:/usr/src/myapp
 
 cache:
-  build: dfiles/data
+  image: busybox
+  # build: ./dfiles/data
   volumes:
-    - cache:/data
+    - ./cache:/data
 
-node:  
-  build: dfiles/node
+node:
+  # build: ./dfiles/node
+  image: node
   volumes_from:
-    - data
     - cache
+    - code
+  links:
+    - mongo:mongo
   # ports:
   #   - "7070:7070"
   working_dir: /usr/src/myapp
+
+
+mongo:
+    image: mongo
+    volumes:
+        - ./db:/data/db
