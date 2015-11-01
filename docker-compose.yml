@@ -26,3 +26,10 @@ mongo:
     image: mongo
     volumes:
         - ./db:/data/db
+
+mongo-express:
+    image: knickers/mongo-express
+    links:
+        - mongo:mongo
+    ports:
+        - "8081:8081"
