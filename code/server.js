@@ -12,48 +12,23 @@ var mongo = require('mongodb').MongoClient;//,
 // Connection URL
 var mdbUrl = 'mongodb://mongo:27017/nodechan';
 
-// mongo.connect(url, function(err, db) {
-//     assert.equal(null, err);
-//     console.log("Connected correctly to server");
-//
-//     db.close();
-// });
-
 
 co(function*(){
 
-    console.log('hello world?');
     var db = yield mongo.connect(mdbUrl);
-    console.log('goodbye world');
+    var thrl = require('./threadList.js')(db, board);
 
     var threads = db.collection('threads');
     yield threads.createIndex({"no": 1}, {unique: true});
-    // yield db.close();
-    console.log('index?');
 
     // nextTest();
-    yield allThreads('b', function(){
-        console.log('done?');
-        db.close();
+    thrl.board = 'g';
+
+    thrl.saveAll(function(){
+        console.log('doneend');
+        // db.close()
     });
-    console.log('here?');
 
-    function saveThreads(thrds, cb){
-
-        // db.open(function(err, db){
-            // console.log('potato');
-            // console.log(db);
-
-            var threads = db.collection('threads');
-            threads.insertMany(thrds, function(err, result){
-                console.log(err);
-                console.log(result);
-                console.log('insert done maybe');
-                // db.close();
-                cb();
-            });
-        // });
-    }
 
     function nextTest(){
 
@@ -70,12 +45,6 @@ co(function*(){
                 console.log('done?');
                 // db.close();
             }
-        });
-    }
-
-    var testAll = function(){
-        allThreads('b', function(){
-            console.log('done?');
         });
     }
 
@@ -107,28 +76,6 @@ co(function*(){
         });
     }
 
-    // requests and returns array object of all
-    function allThreads(board, callback){
-
-        var addr = 'http://a.4cdn.org/' + board + '/threads.json';
-        request(addr, function(error, response, body){
-            var pages = JSON.parse(body);
-            var threads = Array();
-            // for(a in parsed){
-            //     yield saveThreads(parsed[a].threads);
-            // }
-
-            async.eachSeries(pages, function iterator(page, cb) {
-                console.log('wat');
-                // console.log(page.threads);
-                // getImg(post, board, callback);
-                saveThreads(page.threads, cb);
-                // cb();
-            });
-            // callback(threads);
-            callback();
-        });
-    }
 
     function thread(thread, board, callback){
         // request('http://a.4cdn.org/' + board + '/thread/' + thread.no +'.json', function(error, response, body){
@@ -153,24 +100,6 @@ co(function*(){
         });
 
     }
-
-    // allThreads('b', function(tlist){
-    //
-    //     return;
-    //     // go thourgh all the threads in post and download the image
-    //     for(i in tlist){
-    //     // var i = 0;
-    //         thread('b', tlist[i], function(posts){
-    //                 console.log(posts.length);
-    //                 async.eachSeries(posts, function iterator(post, callback) {
-    //                     console.log(post.no);
-    //                     getImg(post, board, callback);
-    //                 });
-    //         });
-    //     }
-    //
-    // });
-
 
     // load all thread ids into db, all based on UTC time
     function populateThreads(){
@@ -219,13 +148,4 @@ co(function*(){
         });
     }
 
-    // populatePosts();
-    // testa();
 });
-// nchan = new NodeChan();
-// nchan.dbInit();
-// setTimeout(function(){
-//     console.log('then');
-//     // nchan.testAll();
-//     nchan.nextTest();
-// }, 200);
