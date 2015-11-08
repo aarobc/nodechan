@@ -6,7 +6,9 @@ var request = require('request');
 var fs = require('fs');
 var async = require('async');
 var co = require('co');
-var mongo = require('mongodb').MongoClient;//,
+// var mongo = require('mongodb').MongoClient;//,
+var db = require('./db.js').db;//,
+console.log('start');
 // assert = require('assert');
 
 // Connection URL
@@ -15,19 +17,30 @@ var mdbUrl = 'mongodb://mongo:27017/nodechan';
 
 co(function*(){
 
-    var db = yield mongo.connect(mdbUrl);
+    // var db = yield mongo.connect(mdbUrl);
+
+    var db = mongo.getDB();
+    console.log('treate');
+    return;
     var thrl = require('./threadList.js')(db, board);
 
     var threads = db.collection('threads');
     yield threads.createIndex({"no": 1}, {unique: true});
 
     // nextTest();
+    // can change the board like this
     thrl.board = 'g';
 
-    thrl.saveAll(function(){
-        console.log('doneend');
-        // db.close()
-    });
+    thrl.watch(5000);
+
+    setTimeout(function(){
+        thrl.stop();
+        db.close();
+    }, 20000);
+    // thrl.saveAll(function(){
+    //     console.log('doneend');
+    //     db.close();
+    // });
 
 
     function nextTest(){
