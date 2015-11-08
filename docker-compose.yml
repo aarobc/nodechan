@@ -10,17 +10,21 @@ cache:
     - ./cache:/data
 
 node:
-  # build: ./dfiles/node
-  image: node
+  # image: node
+  build: ./dfiles/node
   volumes_from:
     - cache
     - code
   links:
     - mongo:mongo
-  # ports:
-  #   - "7070:7070"
+  ports:
+    - "8080:8080"
+    - "5858:5858"
   working_dir: /usr/src/myapp
-
+  environment:
+    node-inspector_web-host: 0.0.0.0
+    node-inspector_save-live-edit: 'true'
+  user: ac
 
 mongo:
     image: mongo

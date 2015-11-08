@@ -6,8 +6,6 @@ var request = require('request');
 var fs = require('fs');
 var async = require('async');
 var co = require('co');
-// TODO: figure out how to set the field unique in here:
-// db.threads.createIndex({"no": 1}, {unique: true})
 var mongo = require('mongodb').MongoClient;//,
 // assert = require('assert');
 
@@ -27,34 +25,38 @@ co(function*(){
     console.log('hello world?');
     var db = yield mongo.connect(mdbUrl);
     console.log('goodbye world');
-    // db.close();
 
     var threads = db.collection('threads');
     yield threads.createIndex({"no": 1}, {unique: true});
+    yield db.close();
     console.log('index?');
 
-    nextTest();
-
+    // nextTest();
+    yield allThreads('b', function(){
+        console.log('done?');
+    });
     console.log('here?');
-    var saveThreads = function(thrds){
 
-        mongo.connect(url, function(err, db) {
-            // console.log("Connected correctly to server");
+    function saveThreads(thrds, cb){
 
-            var threads = db.collection('threads');
-            threads.insertMany(thrds, function(err, result){
-                // cb();
-                // console.log('inserted');
-                console.log(err);
-                console.log(result);
-                // nc.db.close();
-                console.log('insert done maybe');
-                db.close();
-            });
-        });
+        // db.open(function(err, db){
+        //     console.log('potato');
+        //     db.close(function(){
+        //         cb();
+        //     });
+
+            // var threads = db.collection('threads');
+            // threads.insertMany(thrds, function(err, result){
+            //     // console.log(err);
+            //     // console.log(result);
+            //     // console.log('insert done maybe');
+            //     db.close();
+            //     cb();
+            // });
+        // });
     }
 
-    var nextTest = function(){
+    function nextTest(){
 
         // yield db.open();
         console.log('nextTest');
@@ -64,14 +66,12 @@ co(function*(){
             console.log(thread);
             console.log(err);
             console.log("what");
+            if(thread == null){
+                // callback here if to do something else fun
+                console.log('done?');
+                db.close();
+            }
         });
-        // while(yield cursor.hasNext()) {
-        //     // docs.push(yield cursor.next());
-        //     console.log(yield cursor.next());
-        // }
-        console.log('done?');
-        db.close();
-        // });
     }
 
     var testAll = function(){
@@ -113,20 +113,19 @@ co(function*(){
 
         var addr = 'http://a.4cdn.org/' + board + '/threads.json';
         request(addr, function(error, response, body){
-            var parsed = JSON.parse(body);
+            var pages = JSON.parse(body);
             var threads = Array();
-            for(a in parsed){
-                // threads = threads.concat(parsed[a].threads);
-                // console.log(parsed[a].threads);
-                // console.log('next');
-                saveThreads(parsed[a].threads);
-                // for(j in parsed[a].threads){
-                //     var thread = parsed[a].threads[j];
-                //     console.log(thread);
-                //     console.log('potatoes?');
-                //     saveThreads(thread);
-                // }
-            }
+            // for(a in parsed){
+            //     yield saveThreads(parsed[a].threads);
+            // }
+
+            async.eachSeries(pages, function iterator(page, cb) {
+                console.log('wat');
+                // console.log(page.threads);
+                // getImg(post, board, callback);
+                saveThreads(page.threads, cb);
+                // cb();
+            });
             // callback(threads);
             callback();
         });

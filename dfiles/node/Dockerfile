@@ -1,5 +1,6 @@
 FROM node
-RUN npm install request
-RUN npm install fs
-# RUN useradd ac
+RUN npm install -g node-inspector
+RUN useradd -p ac ac
+RUN mkdir -p /home/ac
 # USER ac
+# EXPOSE 8080 5858
