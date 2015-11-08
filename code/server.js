@@ -28,31 +28,30 @@ co(function*(){
 
     var threads = db.collection('threads');
     yield threads.createIndex({"no": 1}, {unique: true});
-    yield db.close();
+    // yield db.close();
     console.log('index?');
 
     // nextTest();
     yield allThreads('b', function(){
         console.log('done?');
+        db.close();
     });
     console.log('here?');
 
     function saveThreads(thrds, cb){
 
         // db.open(function(err, db){
-        //     console.log('potato');
-        //     db.close(function(){
-        //         cb();
-        //     });
+            // console.log('potato');
+            // console.log(db);
 
-            // var threads = db.collection('threads');
-            // threads.insertMany(thrds, function(err, result){
-            //     // console.log(err);
-            //     // console.log(result);
-            //     // console.log('insert done maybe');
-            //     db.close();
-            //     cb();
-            // });
+            var threads = db.collection('threads');
+            threads.insertMany(thrds, function(err, result){
+                console.log(err);
+                console.log(result);
+                console.log('insert done maybe');
+                // db.close();
+                cb();
+            });
         // });
     }
 
@@ -69,7 +68,7 @@ co(function*(){
             if(thread == null){
                 // callback here if to do something else fun
                 console.log('done?');
-                db.close();
+                // db.close();
             }
         });
     }

@@ -2,7 +2,7 @@
   "name": "nodechan",
   "version": "1.0.0",
   "description": "download 4chan",
-  "main": "nodechan.js",
+  "main": "server.js",
   "dependencies": {
     "fs": "^0.0.2",
     "mongodb": "^2.0.47",
@@ -14,7 +14,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "dcrrm node node nodechan.js"
+    "test": "dcrrm node node server.js"
   },
   "repository": {
     "type": "git",
