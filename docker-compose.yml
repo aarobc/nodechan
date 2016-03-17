@@ -10,8 +10,8 @@ cache:
     - ./cache:/data
 
 node:
-  # image: node
-  build: ./dfiles/node
+  image: node
+  # build: ./dfiles/node
   volumes_from:
     - cache
     - code
@@ -24,7 +24,7 @@ node:
   environment:
     node-inspector_web-host: 0.0.0.0
     node-inspector_save-live-edit: 'true'
-  user: ac
+  # user: ac
 
 mongo:
     image: mongo:3.2

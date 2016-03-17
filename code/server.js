@@ -6,9 +6,8 @@ var request = require('request');
 var fs = require('fs');
 var async = require('async');
 var co = require('co');
-// var mongo = require('mongodb').MongoClient;//,
-var db = require('./db.js').db;//,
-console.log('start');
+var mongo = require('mongodb').MongoClient;//,
+// var db = require('./db.js').db;//,
 // assert = require('assert');
 
 // Connection URL
@@ -17,30 +16,29 @@ var mdbUrl = 'mongodb://mongo:27017/nodechan';
 
 co(function*(){
 
-    // var db = yield mongo.connect(mdbUrl);
-
-    var db = mongo.getDB();
-    console.log('treate');
-    return;
+    var db = yield mongo.connect(mdbUrl);
+    //
+    // console.log('treate');
     var thrl = require('./threadList.js')(db, board);
-
+    //
     var threads = db.collection('threads');
-    yield threads.createIndex({"no": 1}, {unique: true});
-
-    // nextTest();
-    // can change the board like this
-    thrl.board = 'g';
-
-    thrl.watch(5000);
-
-    setTimeout(function(){
-        thrl.stop();
-        db.close();
-    }, 20000);
-    // thrl.saveAll(function(){
-    //     console.log('doneend');
+    // yield threads.createIndex({"no": 1}, {unique: true});
+    //
+    // // nextTest();
+    // // can change the board like this
+    // thrl.board = 'g';
+    //
+    // thrl.watch(5000);
+    //
+    // setTimeout(function(){
+    //     thrl.stop();
     //     db.close();
-    // });
+    // }, 20000);
+
+    console.log('start');
+    var pp = require('./processPost.js')(db);
+    pp.iterate();
+    console.log('end');
 
 
     function nextTest(){
@@ -74,20 +72,19 @@ co(function*(){
             console.log('file done');
             cb(null, post);
         });
-
         // run it
         request(addr).pipe(picStream);
 
     }
 
 
-    function asyncExample(){
-
-        async.map(orders.orders, parseOrder, function(err, results) {
-            // console.log(results);
-            formatData(results);
-        });
-    }
+    // function asyncExample(){
+    //
+    //     async.map(orders.orders, parseOrder, function(err, results) {
+    //         // console.log(results);
+    //         formatData(results);
+    //     });
+    // }
 
 
     function thread(thread, board, callback){
@@ -114,37 +111,24 @@ co(function*(){
 
     }
 
-    // load all thread ids into db, all based on UTC time
-    function populateThreads(){
 
-        allThreads(board, function(tlist){
-            // console.log(tlist);
-            var stmt = db.prepare("INSERT INTO threads VALUES (?, ?, datetime(?, 'unixepoch', 'utc'), 0, datetime('now', 'utc'))");
-            for(i in tlist){
-                stmt.run(tlist[i].no, 'b', tlist[i].last_modified);
-            }
-            stmt.finalize();
-        });
-    }
-
-
-    function populatePosts(board){
-        db.each("SELECT * from threads", function(err, row) {
-            // console.log(row.id);
-            thread(row.id, row.board, function(thr){
-                console.log(thr);
-                // TODO: get this working
-                db.run("INSERT INTO posts (id, text, threads_id, created) VALUES  (" +
-                       thr.no + ", '"+ thr.com + "', " + row.id +"," + thr.time + ")");
-
-            });
-            // console.log(row);
-            // return;
-            // console.log(row.id + ": " + row.last_modified);
-            // var stmt = db.run("INSERT INTO posts VALUES (, ?, datetime(?, 'unixepoch', 'utc'), 0, datetime('now', 'utc'))");
-            //   console.log(row);
-        });
-    }
+    // function populatePosts(board){
+    //     db.each("SELECT * from threads", function(err, row) {
+    //         // console.log(row.id);
+    //         thread(row.id, row.board, function(thr){
+    //             console.log(thr);
+    //             // TODO: get this working
+    //             db.run("INSERT INTO posts (id, text, threads_id, created) VALUES  (" +
+    //                    thr.no + ", '"+ thr.com + "', " + row.id +"," + thr.time + ")");
+    //
+    //         });
+    //         // console.log(row);
+    //         // return;
+    //         // console.log(row.id + ": " + row.last_modified);
+    //         // var stmt = db.run("INSERT INTO posts VALUES (, ?, datetime(?, 'unixepoch', 'utc'), 0, datetime('now', 'utc'))");
+    //         //   console.log(row);
+    //     });
+    // }
 
     var insertDocuments = function(db, callback) {
         // Get the documents collection

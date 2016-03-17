@@ -12,7 +12,9 @@
     "async": "^1.2.1",
     "co": "^4.6.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "bluebird": "^3.3.4"
+  },
   "scripts": {
     "test": "dcrrm node node server.js"
   },
