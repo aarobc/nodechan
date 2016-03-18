@@ -2,6 +2,7 @@ var async = require('async');
 var request = require('request');
 var each = require('mongo-each');
 var _ = require('lodash');
+var fs = require('fs-promise');
 
 var rp = require('request-promise');
 
@@ -135,18 +136,22 @@ module.exports = function(db, board){
 
 
     }
-    // module.watch = function(refresh){
-    //     interval = setInterval(function(){
-    //         module.saveAll(function(){
-    //             console.log('doneend');
-    //             // db.close();
-    //         });
-    //     }, refresh);
-    // };
 
-    // module.stop = function(){
-    //     clearInterval(interval);
-    // }
+    function download(post, board, cb){
+        // console.log(img);
+        var addr = `http://i.4cdn.org/${board}/${post.tim}${post.ext}`;
+        var dest = `/data/${board}/${post.filename}${post.ext}`;
+        var picStream = fs.createWriteStream(dest);
+
+        // setting up the pic stream with callbacks
+        picStream.on('close', function() {
+            console.log('file done');
+            cb(null, post);
+        });
+        // run it
+        request(addr).pipe(picStream);
+
+    }
 
     return module;
 };
