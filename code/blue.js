@@ -22,6 +22,9 @@ mongoClient.connectAsync('mongodb://mongo:27017/mydb')
     .then((dba) => {
         db = dba;
         thrl = require('./threadList.js')(db, board);
+        db.collection('threads').createIndex({"no": 1}, {unique: true});
+        db.collection('posts').createIndex({"no.thread": 1}, {unique: true});
+
         // return db.collection('content').findAsync({})
         // return  db.collection('posts').insertAsync({mike: 'wizouski'});
         return "12";
@@ -42,11 +45,13 @@ mongoClient.connectAsync('mongodb://mongo:27017/mydb')
     });
 
 function process(){
-    // thrl.watch(10000);
-    thrl.saveAll( () => {
-        console.log('potatoes');
-    } );
-    return "23";
-    // return thrl.saveAll();
+    var a = "green";
+    thrl.processThreads().then((r) =>{
+        a = r;
+        console.log(r);
+        thrl.processPosts();
+        return r;
+    });
+    return a;
 
 }

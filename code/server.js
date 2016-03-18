@@ -35,10 +35,10 @@ co(function*(){
     //     db.close();
     // }, 20000);
 
-    console.log('start');
-    var pp = require('./processPost.js')(db);
-    pp.iterate();
-    console.log('end');
+    // console.log('start');
+    // var pp = require('./processPost.js')(db);
+    // pp.iterate();
+    // console.log('end');
 
 
     function nextTest(){
