@@ -2,7 +2,10 @@ var async = require('async');
 var request = require('request');
 var each = require('mongo-each');
 var _ = require('lodash');
-var fs = require('fs-promise');
+var fs = require('fs');
+var http = require('http');
+var url = require('url');
+var Promise = require('bluebird');
 
 var rp = require('request-promise');
 
@@ -34,7 +37,7 @@ module.exports = function(db, board){
             }, function(dbThread, callb){
                 var there = _.find(threads, {no: dbThread.no});
                 if(!there){
-                    console.log('not there');
+                    // console.log('not there');
                     dbThreads.updateOne(dbThread, {$set: {deleted: true}}, function(err, result){
                         callb();
                     });
@@ -52,7 +55,7 @@ module.exports = function(db, board){
                     });
                 }, function(){
                     // cb();
-                    resolve('inserted the thing');
+                    resolve({msg: 'inserted the thread list'});
                 });
             });
         })
@@ -91,16 +94,23 @@ module.exports = function(db, board){
             .find({deleted: false}, {no: 1, _id: 0});
 
             cursor.toArrayAsync().then((threads) => {
-                console.log('thread: ' + threads[0].no);
-                return loadThread(threads[0].no);
+                return loadThread(threads[1]);
+                // return Promise.all(actions);
+                // var actions = threads.map(loadThread);
+                // return pseries(actions);
             }).then((stuff) => {
-                console.log('done');
-                return 'oe';
+                console.log('processPosts done');
+                // var f = _.filter(stuff, 'downloaded');
+                // console.log(f);
+                console.log(stuff);
+                // console.log(f.length);
+                return stuff;
             });
         // });
     }
 
     function loadThread(thread){
+        thread = thread.no;
         return new Promise( (resolve) => {
             var options = {
                 uri:`http://a.4cdn.org/${module.board}/thread/${thread}.json`,
@@ -110,48 +120,113 @@ module.exports = function(db, board){
                 // console.log(posts.posts);
                 posts = _.enhance(posts.posts, {thread: thread});
 
-                return posts.map(insertPosts);
+                // return itest(posts);
+                // debugger;
+                // var actions = posts.map(insertPost);
+                itest(posts);
+                console.log("loadTread");
+                return "12";
+                // return pseries(actions);
             }).catch(err => {
+                console.log(err);
                 console.log('err, probably not therr');
+                resolve({msg: "thread does not exist exist"});
             }).then(res => {
-                // console.log(res);
-                console.log('almost');
+                console.log('the stuff');
+                // var f = _.filter(res, 'downloaded');
+                // console.log(f);
+                // console.log(f.length);
+                console.log(res);
+                resolve(res);
             });
 
         });
     }
 
-    function insertPosts(post){
-        console.log(post.no);
+    function itest(posts){
+        // insertPost(posts[0]).then(val => {
+        //     console.log('returned val');
+        //     console.log(val);
+        // });
+
+        Promise.reduce(posts, (pac, post) =>{
+            console.log(pac);
+            return insertPost(post);
+        }, 0).then(total =>{
+            console.log('total');
+            console.log(total);
+            return total;
+        });
+    }
+
+    //p process promises serially
+    function pseries(list){
+        var p = Promise.resolve('pseries');
+        return list.reduce((pacc, fn, index) => {
+            // var n = pacc.then(fn);
+            console.log(index);
+            return pacc = pacc.then(fn);
+            return n;
+        }, p);
+    }
+
+    function insertPost(post){
+        // console.log(post.no);
         return new Promise(resolve => {
 
             db.collection('posts').insertAsync(post)
             .then(res => {
-                resolve('inswerded');
+                // resolve('inswerded');
+                if(post.ext){
+                    return download(post);
+                }
+                else{
+                    return {msg: 'no image'};
+                }
             }).catch(err => {
-                console.log(err);
-                resolve('err');
+                // console.log(err);
+                resolve({msg: 'already in db'});
+            }).then(p => {
+                // console.log('endl');
+               // console.log(p);
+               // debugger;
+               resolve(p);
             });
         });
 
 
     }
 
-    function download(post, board, cb){
-        // console.log(img);
-        var addr = `http://i.4cdn.org/${board}/${post.tim}${post.ext}`;
-        var dest = `/data/${board}/${post.filename}${post.ext}`;
-        var picStream = fs.createWriteStream(dest);
+    function download(post){
+        // console.log(post);
+        return new Promise(resolv =>{
+            var addr = `http://i.4cdn.org/${board}/${post.tim}${post.ext}`;
+            var dest = `/data/${board}/${post.filename}${post.ext}`;
 
-        // setting up the pic stream with callbacks
-        picStream.on('close', function() {
-            console.log('file done');
-            cb(null, post);
+            var options = {
+                host: url.parse(addr).host,
+                port: 80,
+                path: url.parse(addr).pathname
+            };
+
+            // var file_name = url.parse(file_url).pathname.split('/').pop();
+            var file = fs.createWriteStream(dest);
+
+            http.get(options, function(res) {
+                res.on('data', function(data) {
+                    file.write(data);
+                }).on('end', function() {
+                    file.end();
+                    console.log('downloaded ' + addr);
+                    resolv({downloaded: addr});
+                });
+            });
+
         });
-        // run it
-        request(addr).pipe(picStream);
 
     }
+
+    // var downlad = function(file_url) {
 
     return module;
 };

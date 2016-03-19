@@ -1,20 +1,9 @@
-code:
-  image: busybox
-  volumes:
-    - ./code:/usr/src/myapp
-
-cache:
-  image: busybox
-  # build: ./dfiles/data
-  volumes:
-    - ./cache:/data
-
 node:
   image: node
   # build: ./dfiles/node
-  volumes_from:
-    - cache
-    - code
+  volumes:
+    - ./code:/usr/src/myapp
+    - ./cache:/data
   links:
     - mongo:mongo
   ports:
