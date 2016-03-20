@@ -210,12 +210,15 @@ module.exports = function(db, board){
                     resolv({downloaded: addr});
                 });
             });
-
         });
-
     }
 
-    // var downlad = function(file_url) {
+
+    function filter(terms){
+        return new Promise(resolv =>{
+
+        });
+    }
 
     return module;
 };

@@ -31,9 +31,9 @@ mongoClient.connectAsync('mongodb://mongo:27017/nodechan')
 function process(){
     var a = "green";
     thrl.processThreads().then((r) =>{
-        a = r;
         console.log(r);
         thrl.processPosts();
+        return thrl.processPosts();
         return r;
     });
     return a;
