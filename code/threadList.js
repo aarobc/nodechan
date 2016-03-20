@@ -89,24 +89,26 @@ module.exports = function(db, board){
 
 
     module.processPosts = function(){
-        // return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             var cursor = db.collection('threads')
             .find({deleted: false}, {no: 1, _id: 0});
 
             cursor.toArrayAsync().then((threads) => {
-                return loadThread(threads[1]);
+                // return loadThread(threads[0]);
+                return mapSerial(threads, loadThread);
                 // return Promise.all(actions);
                 // var actions = threads.map(loadThread);
                 // return pseries(actions);
-            }).then((stuff) => {
+            }).then((val) => {
                 console.log('processPosts done');
-                // var f = _.filter(stuff, 'downloaded');
+                var f = _.filter(val, 'downloaded');
                 // console.log(f);
-                console.log(stuff);
-                // console.log(f.length);
-                return stuff;
+                // console.log(val);
+                console.log(f.length);
+                // return stuff;
+                resolve(val);
             });
-        // });
+        });
     }
 
     function loadThread(thread){
@@ -119,55 +121,42 @@ module.exports = function(db, board){
             rp(options).then(posts => {
                 // console.log(posts.posts);
                 posts = _.enhance(posts.posts, {thread: thread});
+                console.log('posts length');
+                console.log(posts.length);
 
-                // return itest(posts);
-                // debugger;
-                // var actions = posts.map(insertPost);
-                itest(posts);
-                console.log("loadTread");
-                return "12";
-                // return pseries(actions);
+                return mapSerial(posts, insertPost);
             }).catch(err => {
                 console.log(err);
                 console.log('err, probably not therr');
-                resolve({msg: "thread does not exist exist"});
+                resolve({msg: "thread probably does not exist exist"});
             }).then(res => {
-                console.log('the stuff');
-                // var f = _.filter(res, 'downloaded');
+                console.log('results length');
+                console.log(res.length);
+                var f = _.filter(res, 'downloaded');
+                console.log('downloaded:' + f.length);
                 // console.log(f);
-                // console.log(f.length);
-                console.log(res);
+                // console.log(res);
                 resolve(res);
             });
 
         });
     }
 
-    function itest(posts){
-        // insertPost(posts[0]).then(val => {
-        //     console.log('returned val');
-        //     console.log(val);
-        // });
+    function mapSerial(posts, method){
 
-        Promise.reduce(posts, (pac, post) =>{
-            console.log(pac);
-            return insertPost(post);
-        }, 0).then(total =>{
-            console.log('total');
-            console.log(total);
-            return total;
+        return new Promise(resolv => {
+
+            var retd = Array();
+            Promise.reduce(posts, (pac, post) =>{
+                retd.push(pac);
+                return method(post);
+            }, 0).then(val =>{
+                retd.push(val);
+                retd.shift();
+                resolv(retd);
+            });
+
         });
-    }
-
-    //p process promises serially
-    function pseries(list){
-        var p = Promise.resolve('pseries');
-        return list.reduce((pacc, fn, index) => {
-            // var n = pacc.then(fn);
-            console.log(index);
-            return pacc = pacc.then(fn);
-            return n;
-        }, p);
     }
 
     function insertPost(post){

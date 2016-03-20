@@ -7,7 +7,7 @@ var board = 'b';
 var db;
 var thrl;
 
-mongoClient.connectAsync('mongodb://mongo:27017/mydb')
+mongoClient.connectAsync('mongodb://mongo:27017/nodechan')
     .then((dba) => {
         db = dba;
         thrl = require('./threadList.js')(db, board);
