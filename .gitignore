@@ -1,6 +1,6 @@
 *.swp
 /cache/images
 /cache
-code/node_modules
+src/node_modules
 *.mwb*
 db
