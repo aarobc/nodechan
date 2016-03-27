@@ -2,17 +2,17 @@ node:
   image: node
   # build: ./dfiles/node
   volumes:
-    - ./code:/usr/src/myapp
+    - ./src:/usr/src/myapp
     - ./cache:/data
   links:
     - mongo:mongo
   ports:
     - "8080:8080"
-    - "5858:5858"
   working_dir: /usr/src/myapp
   environment:
     node-inspector_web-host: 0.0.0.0
     node-inspector_save-live-edit: 'true'
+    PORT: 8080
   # user: ac
 
 mongo:

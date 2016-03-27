@@ -4,3 +4,4 @@
 src/node_modules
 *.mwb*
 db
+/src/npm-debug.log
