@@ -190,7 +190,8 @@ module.exports = function(db, board){
         // console.log(post);
         return new Promise(resolv =>{
             var addr = `http://i.4cdn.org/${board}/${post.tim}${post.ext}`;
-            var dest = `/data/${board}/${post.filename}${post.ext}`;
+            // var dest = `/usr/src/myapp/public/cache/${board}/${post.tim}${post.ext}`;
+            var dest = `/cache/images/${post.tim}${post.ext}`;
 
             var options = {
                 host: url.parse(addr).host,

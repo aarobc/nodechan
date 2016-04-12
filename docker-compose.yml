@@ -1,18 +1,37 @@
 node:
-  image: node
-  # build: ./dfiles/node
+  # image: node
+  build: ./dfiles/node
   volumes:
     - ./src:/usr/src/myapp
     - ./cache:/data
   links:
     - mongo:mongo
-  ports:
-    - "8080:8080"
   working_dir: /usr/src/myapp
   environment:
     node-inspector_web-host: 0.0.0.0
     node-inspector_save-live-edit: 'true'
-    PORT: 8080
+  # user: ac
+
+nodechan:
+  # image: node
+  build: ./dfiles/node
+  volumes:
+    - ./src:/usr/src/myapp
+    - ./cache:/cache
+  links:
+    - mongo:mongo
+  ports:
+    - "8080:8080"
+    - "5858:5858"
+    - "7070:7070"
+  working_dir: /usr/src/myapp
+  environment:
+    node-inspector_web-host: 0.0.0.0
+    # node-inspector_save-live-edit: 'true'
+    PORT: 7070
+    DEBUG: nodechan:*
+    # DEBUG: '*:*'
+  command: npm start
   # user: ac
 
 mongo:

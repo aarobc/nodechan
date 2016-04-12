@@ -24,6 +24,7 @@
   },
   "scripts": {
     "test": "node server.js",
+    "debug": "node-debug ./bin/www",
     "start": "node ./bin/www"
   },
   "repository": {
