@@ -10,6 +10,7 @@ node:
   environment:
     node-inspector_web-host: 0.0.0.0
     node-inspector_save-live-edit: 'true'
+  entrypoint: /bin/bash
   # user: ac
 
 nodechan:

@@ -25,7 +25,7 @@
   "scripts": {
     "test": "node server.js",
     "debug": "node-debug ./bin/www",
-    "start": "node ./bin/www"
+    "start": "nodemon ./bin/www"
   },
   "repository": {
     "type": "git",
