@@ -11,6 +11,8 @@ node:
     node-inspector_web-host: 0.0.0.0
     node-inspector_save-live-edit: 'true'
   entrypoint: /bin/bash
+  ports:
+    - "8080:8080"
   # user: ac
 
 nodechan:
@@ -22,7 +24,6 @@ nodechan:
   links:
     - mongo:mongo
   ports:
-    - "8080:8080"
     - "5858:5858"
     - "7070:7070"
   working_dir: /usr/src/myapp

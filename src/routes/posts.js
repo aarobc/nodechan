@@ -26,7 +26,8 @@ router.get('/:tid', function(req, res) {
     .then(db => {
         var cursor = db.collection(collection)
         // .find({});
-        .find({no: parseInt(req.params.tid)}, {_id: 0});
+        .find({thread: parseInt(req.params.tid)}, {_id: 0})
+        .sort({no: -1})
 
         return cursor.toArrayAsync();
     }).then(threads =>{

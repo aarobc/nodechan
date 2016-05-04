@@ -5,12 +5,16 @@ var mongoClient = Promise.promisifyAll(require('mongodb')).MongoClient;
 
 var collection = 'threads';
 router.get('/', function(req, res) {
+    var limit = (req.query.limit) ? Number(req.query.limit) : 20;
+    var find = (req.query.no) ? {no: {$lt: Number(req.query.no)}} : {};
+    console.log(find);
     mongoClient.connectAsync('mongodb://mongo:27017/nodechan')
     .then(db => {
         var cursor = db.collection(collection)
         // .find({});
-        .find({}, {_id: 0})
-        .sort({last_modified: -1});
+        .find(find, {_id: 0})
+        .sort({no: -1})
+        .limit(limit);
 
         return cursor.toArrayAsync();
     }).then(threads =>{
@@ -19,10 +23,9 @@ router.get('/', function(req, res) {
         // res.send("potatoes");
     });
 });
-/* GET users listing. */
+
 router.get('/:tid', function(req, res) {
 
-    console.log(req.params.tid);
     mongoClient.connectAsync('mongodb://mongo:27017/nodechan')
     .then(db => {
         var cursor = db.collection(collection)

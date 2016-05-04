@@ -1,5 +1,14 @@
 import Vue from 'vue'
 import App from './App.vue'
+import VR from 'vue-resource'
+
+global.jQuery = require('jquery');
+require('bootstrap');
+
+Vue.use(VR)
+
+// Vue.config.devtools = true
+console.log(Vue);
 
 new Vue({
   el: 'body',
