@@ -13,6 +13,7 @@ mongoClient.connectAsync('mongodb://mongo:27017/nodechan')
         thrl = require('./threadList.js')(db, board);
         db.collection('threads').createIndex({"no": 1}, {unique: true});
         db.collection('posts').createIndex({"no": 1}, {unique: true});
+        db.collection('posts').createIndex({"com": "text"});
 
         return "12";
     })

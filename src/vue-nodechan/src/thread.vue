@@ -1,11 +1,19 @@
 <template>
-<div>
-    <div v-for="post in posts" class='row'>
-        <div class="col-md-3">
-            <img v-if="post.ext" :src="'images/' + post.tim + post.ext">
-        </div>
-        <div class="col-md-5">
-            {{{ post.com }}}
+<div class="list-group scrollbox">
+    <div v-for="post in posts" class='list-group-item'>
+        <div class="row">
+            <div class="col-md-3">
+                <a target="_blank" :href="'images/' + post.tim + post.ext">
+                <img class="thumb" v-if="post.ext && post.ext != '.webm'"
+                :src="'images/' + post.tim + post.ext">
+                <video preload="metadata" class="thumb" controls v-if="post.ext == '.webm'">
+                    <source :src="'images/' + post.tim + post.ext">
+                </video>
+                </a>
+            </div>
+            <div class="col-md-9">
+                {{{ post.com }}}
+            </div>
         </div>
     </div>
 </div>
@@ -43,9 +51,22 @@ export default {
 </script>
 
 <style>
-    img{
-        width: 100%;
+    .thumb{
+        max-width: 100%;
+        max-height: 215px;
     }
+
+    .scrollbox{
+        height: calc(100vh - 112px);
+        overflow: auto;
+        margin-bottom: 0px;
+    }
+    /* img:hover{ */
+    /*     position:fixed; */
+    /*     top:0px; */
+    /*     right: 0px; */
+    /* } */
+
 /* @import '../node_modules/bootstrap/dist/css/bootstrap.css'; */
 /* body { */
 /*   font-family: Helvetica, sans-serif; */

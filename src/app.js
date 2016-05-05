@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
 var threads = require('./routes/threads');
+var posts = require('./routes/posts');
 
 var app = express();
 
@@ -25,7 +26,7 @@ app.use('/images', express.static('/cache/images'));
 
 app.use('/', routes);
 app.use('/api/threads', threads);
-app.use('/api/posts', threads);
+app.use('/api/posts', posts);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
