@@ -4,21 +4,6 @@ var router = express.Router();
 var mongoClient = Promise.promisifyAll(require('mongodb')).MongoClient;
 
 var collection = 'posts';
-// router.get('/', function(req, res) {
-//     console.log('/');
-//     mongoClient.connectAsync('mongodb://mongo:27017/nodechan')
-//     .then(db => {
-//         var cursor = db.collection(collection)
-//         // .find({});
-//         .find({}, {_id: 0});
-//
-//         return cursor.toArrayAsync();
-//     }).then(threads =>{
-//         res.send(threads);
-//         // console.log('apples');
-//         // res.send("potatoes");
-//     });
-// });
 
 router.get('/', function(req, res) {
     var limit = (req.query.limit) ? Number(req.query.limit) : 20;

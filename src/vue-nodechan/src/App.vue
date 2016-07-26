@@ -1,6 +1,17 @@
 <template>
   <div id="app" class="container">
-    <h1>Threads</h1>
+    <div class='row'>
+        <div class='col-md-2'>
+        <h1>Threads</h1>
+        </div>
+        <div class='col-md-1 col-md-offset-9'>
+            <select v-model='currentBoard'>
+                <option v-for="board in boards" v-bind:value="board.board">
+                    {{ board.board }}
+                </option>
+            </select>
+        </div>
+    </div>
     <ul class="nav nav-tabs">
         <li v-for="tab in tabs"
             @click="activeTab = tab"
@@ -70,10 +81,14 @@ import Thread from './thread.vue'
 export default {
     data () {
         return {
+            listUrl: '/api/boards',
             url: 'api/posts',
             threads:[],
             tabs: ['Threads'],
             activeTab: 'Threads',
+            boards: [],
+            currentBoard: 'wsg',
+
             request: {
                 query: '',
                 limit: '',
@@ -107,6 +122,12 @@ export default {
            .then((resp) => {
                 this.threads = resp.data;
            });
+
+           this.$http.get(this.listUrl)
+           .then((resp) => {
+                this.boards = resp.data.boards
+                this.currentBoard = resp.data.default
+           });
         },
         addTab(thread){
             this.tabs.push(thread.no);
@@ -132,20 +153,20 @@ export default {
 </script>
 
 <style>
-@import '../node_modules/bootstrap/dist/css/bootstrap.css';
-body {
-  font-family: Helvetica, sans-serif;
-}
-.xbox{
-    top: 0px;
-    right: 7px;
-    position:absolute;
-}
-.none{
-    display:none;
-}
+    @import '../node_modules/bootstrap/dist/css/bootstrap.css';
+    body {
+      font-family: Helvetica, sans-serif;
+    }
+    .xbox{
+        top: 0px;
+        right: 7px;
+        position:absolute;
+    }
+    .none{
+        display:none;
+    }
 
-.space{
-    padding-top:30px;
-}
+    .space{
+        padding-top:30px;
+    }
 </style>

@@ -1,45 +1,41 @@
-node:
-  # image: node
-  build: ./dfiles/node
-  volumes:
-    - ./src:/usr/src/myapp
-    - ./cache:/data
-  links:
-    - mongo:mongo
-  working_dir: /usr/src/myapp
-  environment:
-    node-inspector_web-host: 0.0.0.0
-    node-inspector_save-live-edit: 'true'
-  entrypoint: /bin/bash
-  ports:
-    - "8080:8080"
+# node:
+#   # image: node
+#   build: ./dfiles/node
+#   volumes:
+#     - ./src:/usr/src/myapp
+#     - ./cache:/data
+#   links:
+#     - mongo:mongo
+#   working_dir: /usr/src/myapp
+#   environment:
+#     node-inspector_web-host: 0.0.0.0
+#     node-inspector_save-live-edit: 'true'
+#   entrypoint: /bin/bash
+#   ports:
+#     - "8080:8080"
   # user: ac
 
 nodechan:
-  # image: node
-  build: ./dfiles/node
+  build: .
   volumes:
     - ./src:/usr/src/myapp
     - ./cache:/cache
   links:
     - mongo:mongo
   ports:
-    - "5858:5858"
-    - "7070:7070"
+    # - "5858:5858"
+    - "80:80"
   working_dir: /usr/src/myapp
   environment:
-    node-inspector_web-host: 0.0.0.0
-    # node-inspector_save-live-edit: 'true'
-    PORT: 7070
+    PORT: 80
     DEBUG: nodechan:*
-    # DEBUG: '*:*'
   command: npm start
   # user: ac
 
 mongo:
     image: mongo:3.2
     volumes:
-        - ./db:/data/db
+        - /opt/db:/data/db
 
 mongo-express:
     image: knickers/mongo-express
