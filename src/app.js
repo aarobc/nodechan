@@ -1,16 +1,19 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+var express      = require('express')
+var path         = require('path')
+var favicon      = require('serve-favicon')
+var logger       = require('morgan')
+var cookieParser = require('cookie-parser')
+var bodyParser   = require('body-parser')
 
-var routes = require('./routes/index')
-var threads = require('./routes/threads')
-var posts = require('./routes/posts')
-var boards = require('./routes/boards')
-
-var app = express();
+// routes
+var routes       = require('./routes/index')
+var threads      = require('./routes/threads')
+var posts        = require('./routes/posts')
+var boards       = require('./routes/boards')
+var socket       = require('./routes/socket')
+// setup
+var app          = express()
+var expressWS    = require('express-ws')(app)
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -30,6 +33,9 @@ app.use('/', routes);
 app.use('/api/threads', threads);
 app.use('/api/posts', posts);
 app.use('/api/boards', boards);
+app.use('/api/socket', socket);
+
+// web socket
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

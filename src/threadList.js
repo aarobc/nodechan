@@ -1,30 +1,30 @@
 /* Dependencies */
-var async = require('async')
-var request = require('request')
-var each = require('mongo-each')
-var _ = require('lodash')
-var fs = require('fs')
-var http = require('http')
-var url = require('url')
-var Promise = require('bluebird')
+var async       = require('async')
+var request     = require('request')
+var each        = require('mongo-each')
+var _           = require('lodash')
+var fs          = require('fs')
+var http        = require('http')
+var url         = require('url')
+var rp          = require('request-promise')
+var Promise     = require('bluebird')
 var mongoClient = Promise.promisifyAll(require('mongodb')).MongoClient
 
-var rp = require('request-promise')
+var dbStr = 'mongodb://mongo:27017/nodechan'
 
-_.enhance = function(list, source) {
-    return _.map(list, function(element) { return _.extend({}, element, source); })
+// method for adding property to array of objects
+_.enhance = (list, source) => {
+    return _.map(list, element => { return _.extend({}, element, source) })
 }
 
-module.exports = function(dbStr){
+module.exports = () => {
 
-    var db = {}
-    var module = {}
+    var db       = {}
+    var module   = {}
     var interval = {}
-    module.board = 'wsg'
-    var dbStr = 'mongodb://mongo:27017/nodechan'
+    var board    = 'wsg'
 
-
-    function insertThreads(threads){
+    var insertThreads = threads => {
         return new Promise((resolve, reject) => {
 
             // workaround because can't figure out a way to add it on the insert
@@ -34,16 +34,15 @@ module.exports = function(dbStr){
 
             var dbThreads = db.collection('threads')
             // getting all the stored threads
-            // var cursor = dbThreads.find({})
             var cursor = dbThreads.find({deleted: false})
 
             each(cursor,{
                 concurrency: 1000,
-            }, function(dbThread, callb){
+            }, (dbThread, callb) => {
                 var there = _.find(threads, {no: dbThread.no})
                 if(!there){
                     // console.log('not there')
-                    dbThreads.updateOne(dbThread, {$set: {deleted: true}}, function(err, result){
+                    dbThreads.updateOne(dbThread, {$set: {deleted: true}}, (err, result) => {
                         callb()
                     })
                 }
@@ -51,27 +50,25 @@ module.exports = function(dbStr){
                     callb()
                 }
 
-            }, function(err){
+            }, (err) => {
                 // have to manually do the inserts because dumb
-                async.eachSeries(threads, function(item, cb2){
-                    dbThreads.updateOne({no: item.no}, item, {upsert: true}, function(e, res){
+                async.eachSeries(threads, (item, cb2) => {
+                    dbThreads.updateOne({no: item.no}, item, {upsert: true}, (e, res) => {
                         // console.log(e)
                         cb2()
                     })
-                }, function(){
+                }, () => {
                     resolve({msg: 'inserted the thread list'})
                 })
             })
         })
     }
 
-// requests and returns array object of all
-     module.processThreads = function(board){
-
-        module.board = board
+    // requests and returns array object of all
+    module.processThreads = () => {
 
         var options = {
-            uri:'http://a.4cdn.org/' + module.board + '/threads.json',
+            uri:'http://a.4cdn.org/' + board + '/threads.json',
             json: true
         }
 
@@ -86,12 +83,15 @@ module.exports = function(dbStr){
             console.log('insert threads')
             // insert(threads, callback)
             return insertThreads(threads)
+        }).catch(err => {
+            console.log('catched!')
+            console.log(err)
         })
 
     }
 
 
-    module.processPosts = function(){
+    module.processPosts = () => {
         return new Promise((resolve, reject) => {
             var cursor = db.collection('threads')
             .find({deleted: false}, {no: 1, _id: 0})
@@ -112,10 +112,10 @@ module.exports = function(dbStr){
         })
     }
 
-    function loadThread(thread){
+    var loadThread = thread => {
 
         var options = {
-            uri:`http://a.4cdn.org/${module.board}/thread/${thread.no}.json`,
+            uri:`http://a.4cdn.org/${board}/thread/${thread.no}.json`,
             json: true
         }
 
@@ -124,14 +124,14 @@ module.exports = function(dbStr){
             // console.log(posts.posts)
             posts = _.enhance(posts.posts, {thread: thread.no})
             console.log('posts length')
-            console.log(module.board)
+            console.log(board)
             console.log(posts.length)
 
             return mapSerial(posts, insertPost)
         }).catch(err => {
-            console.log(err)
+            // console.log(err)
             console.log('err, probably not therr')
-            resolve({msg: "thread probably does not exist exist"})
+            return {msg: "thread probably doesn't exist"}
         })
         .then(res => {
             console.log('results length')
@@ -146,25 +146,21 @@ module.exports = function(dbStr){
 
     }
 
-    function mapSerial(posts, method){
+    var mapSerial = (posts, method) => {
 
-        // return new Promise(resolv => {
-
-            var retd = Array()
-            return Promise.reduce(posts, (pac, post) =>{
-                retd.push(pac)
-                return method(post)
-            }, 0).then(val =>{
-                retd.push(val)
-                retd.shift()
-                // resolv(retd)
-                return retd
-            })
-
-        // })
+        var retd = Array()
+        return Promise.reduce(posts, (pac, post) =>{
+            retd.push(pac)
+            return method(post)
+        }, 0)
+        .then(val =>{
+            retd.push(val)
+            retd.shift()
+            return retd
+        })
     }
 
-    function insertPost(post){
+    var insertPost = post => {
 
         return db.collection('posts').insertAsync(post)
         .then(res => {
@@ -177,13 +173,12 @@ module.exports = function(dbStr){
             return {msg: 'already in db'}
         })
 
-
     }
 
-    function download(post){
+    var download = post => {
         console.log('download')
-        return new Promise((resolv, reject) =>{
-            var addr = `http://i.4cdn.org/${module.board}/${post.tim}${post.ext}`
+        return new Promise((resolv, reject) => {
+            var addr = `http://i.4cdn.org/${board}/${post.tim}${post.ext}`
             console.log(addr)
             var dest = `/cache/images/${post.tim}${post.ext}`
 
@@ -195,10 +190,10 @@ module.exports = function(dbStr){
 
             var file = fs.createWriteStream(dest)
 
-            http.get(options, function(res) {
-                res.on('data', function(data) {
+            http.get(options, res => {
+                res.on('data', data => {
                     file.write(data)
-                }).on('end', function() {
+                }).on('end', () => {
                     file.end()
                     console.log('downloaded ' + addr)
                     resolv({downloaded: addr})
@@ -207,38 +202,28 @@ module.exports = function(dbStr){
         })
     }
 
-    module.connectDB = function(board){
 
-        module.board = board
+    module.runScan = b => {
+        board = b
         console.log(dbStr)
         return mongoClient.connectAsync(dbStr)
         .then(dba => {
             db = dba
             console.log('connected')
-            return dba
-           // return module.processThreads(board)
-           // return module.runScan(board)
+            return module.processThreads()
         })
-        .then((pr) => {
-            console.log(pr)
-            // return module.processPosts()
-            // return 'alice'
-        })
-        // .then(out => {
-        //     return 'motives'
-        // })
-    }
-
-    module.runScan = function(board){
-
-       return module.processThreads(board)
-        .then(pr => {
+        .then((pt) => {
+            console.log(pt)
             return module.processPosts()
         })
+        .then((pp) => {
+            return db.closeAsync()
+        })
+
     }
 
 
-    // function filter(terms){
+    // var filter = terms => {
     //     return new Promise(resolv =>{
     //
     //     })
