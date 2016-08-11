@@ -43,7 +43,9 @@
               </div>
               <div class="input-group space">
                   <div class="input-group-btn">
-                      <button type="button" class="btn btn-default">Rebuild cache</button>
+                      <button type="button" class="btn btn-default" @click="scan">
+                          Rebuild cache
+                      </button>
                   </div>
               </div>
           </div>
@@ -88,6 +90,7 @@ export default {
             activeTab: 'Threads',
             boards: [],
             currentBoard: 'wsg',
+            wsUrl: '/api/scan',
 
             request: {
                 query: '',
@@ -144,6 +147,23 @@ export default {
 
         xbox(tab){
             return (tab == 'Threads') ? 'none' : 'xbox';
+        },
+
+        scan(){
+            // var socket = new WebSocket(this.wsUrl)
+            // var socket = new WebSocket('ws://localhost/api/scan')
+            var socket = new WebSocket('ws://localhost/api/wft')
+            // var socket = new WebSocket('wss://echo.websocket.org')
+
+            socket.onopen = event => {
+                socket.send("Here's some text that the server is urgently awaiting!")
+            }
+
+            socket.onmessage = event => {
+                console.log(event.data)
+                socket.close()
+            }
+
         }
 
 

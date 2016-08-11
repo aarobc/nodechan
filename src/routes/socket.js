@@ -3,10 +3,11 @@ var app = express()
 var expressWS = require('express-ws')(app)
 var router    = express.Router()
 
-router.ws('/echo', function(ws, req) {
-  ws.on('message', function(msg) {
-    ws.send(msg)
-  })
+router.ws('/', (ws, req) => {
+    ws.on('message', msg => {
+        console.log(msg)
+        ws.send(msg)
+    })
 })
 
 module.exports = router
