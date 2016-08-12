@@ -3,7 +3,7 @@
 thrl = require('./threadList.js')()
 
 
-thrl.runScan('b')
+thrl.runScan('wsg')
 .then(scan => {
     console.log(scan)
     return "nop"
