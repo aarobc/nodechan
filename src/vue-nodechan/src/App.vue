@@ -151,9 +151,7 @@ export default {
 
         scan(){
             // var socket = new WebSocket(this.wsUrl)
-            // var socket = new WebSocket('ws://localhost/api/scan')
-            var socket = new WebSocket('ws://localhost/api/wft')
-            // var socket = new WebSocket('wss://echo.websocket.org')
+            var socket = new WebSocket('ws://localhost/api/scan')
 
             socket.onopen = event => {
                 socket.send("Here's some text that the server is urgently awaiting!")
