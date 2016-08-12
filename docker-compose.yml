@@ -1,20 +1,3 @@
-# node:
-#   # image: node
-#   build: ./dfiles/node
-#   volumes:
-#     - ./src:/usr/src/myapp
-#     - ./cache:/data
-#   links:
-#     - mongo:mongo
-#   working_dir: /usr/src/myapp
-#   environment:
-#     node-inspector_web-host: 0.0.0.0
-#     node-inspector_save-live-edit: 'true'
-#   entrypoint: /bin/bash
-#   ports:
-#     - "8080:8080"
-  # user: ac
-
 nodechan:
   build: .
   volumes:
@@ -30,12 +13,11 @@ nodechan:
     PORT: 80
     DEBUG: nodechan:*
   command: npm start
-  # user: ac
 
 mongo:
     image: mongo:3.2
     volumes:
-        - /opt/db:/data/db
+        - ./db:/data/db
 
 mongo-express:
     image: knickers/mongo-express
