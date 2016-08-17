@@ -1,17 +1,30 @@
 /* Dependencies */
 
+var each        = require('mongo-each')
+var Promise     = require('bluebird')
+var mongoClient = Promise.promisifyAll(require('mongodb')).MongoClient
+var dbStr = 'mongodb://mongo:27017/nodechan'
 thrl = require('./threadList.js')()
 
+// mongoClient.connectAsync(dbStr)
+// .then(db => {
+//     return setupDB(db)
+// })
+// .then(e => {
+//     console.log('potato')
+// })
+// .then(() => {
+//
+    thrl.runScan('wsg')
+    .then(scan => {
+        console.log(scan)
+        return "nop"
+    })
+// })
 
-thrl.runScan('wsg')
-.then(scan => {
-    console.log(scan)
-    return "nop"
-})
 
 
-
-function setupDB(){
+function setupDB(db){
     // return new Promise((resolve, reject) => {
     var config = {board: 'wsg'}
     var rp = require('request-promise')

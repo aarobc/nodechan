@@ -20,7 +20,7 @@ mongo:
         - ./db:/data/db
 
 mongo-express:
-    image: knickers/mongo-express
+    image: mongo-express
     links:
         - mongo:mongo
     ports:
