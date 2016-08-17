@@ -23,7 +23,16 @@ module.exports = () => {
     var module   = {}
     var interval = {}
     var board    = 'wsg'
+    var ws       = false
 
+    var report = msg => {
+        var msg = {msg: msg, done: false}
+        console.log(msg)
+        if(ws){
+            var msg = JSON.stringify(msg)
+            ws.send(msg)
+        }
+    }
     var insertThreads = threads => {
         return new Promise((resolve, reject) => {
 
@@ -41,7 +50,7 @@ module.exports = () => {
             }, (dbThread, callb) => {
                 var there = _.find(threads, {no: dbThread.no})
                 if(!there){
-                    // console.log('not there')
+                    // report('not there')
                     dbThreads.updateOne(dbThread, {$set: {deleted: true}}, (err, result) => {
                         callb()
                     })
@@ -54,7 +63,7 @@ module.exports = () => {
                 // have to manually do the inserts because dumb
                 async.eachSeries(threads, (item, cb2) => {
                     dbThreads.updateOne({no: item.no}, item, {upsert: true}, (e, res) => {
-                        // console.log(e)
+                        // report(e)
                         cb2()
                     })
                 }, () => {
@@ -79,13 +88,13 @@ module.exports = () => {
             for(i in pages){
                 threads = threads.concat(pages[i].threads)
             }
-            console.log(threads.length)
-            console.log('insert threads')
+            report(threads.length)
+            report('insert threads')
             // insert(threads, callback)
             return insertThreads(threads)
         }).catch(err => {
-            console.log('catched!')
-            console.log(err)
+            report('catched!')
+            report(err)
         })
 
     }
@@ -101,11 +110,11 @@ module.exports = () => {
                 return mapSerial(threads, loadThread)
             })
             .then((val) => {
-                console.log('processPosts done')
+                report('processPosts done')
                 var f = _.filter(val, 'downloaded')
-                // console.log(f)
-                // console.log(val)
-                console.log(f.length)
+                // report(f)
+                // report(val)
+                report(f.length)
                 // return stuff
                 resolve(val)
             })
@@ -121,25 +130,25 @@ module.exports = () => {
 
         return rp(options)
         .then(posts => {
-            // console.log(posts.posts)
+            // report(posts.posts)
             posts = _.enhance(posts.posts, {thread: thread.no})
-            console.log('posts length')
-            console.log(board)
-            console.log(posts.length)
+            report('posts length')
+            report(board)
+            report(posts.length)
 
             return mapSerial(posts, insertPost)
         }).catch(err => {
-            // console.log(err)
-            console.log('err, probably not therr')
+            // report(err)
+            report('err, probably not therr')
             return {msg: "thread probably doesn't exist"}
         })
         .then(res => {
-            console.log('results length')
-            console.log(res.length)
+            report('results length')
+            report(res.length)
             var f = _.filter(res, 'downloaded')
-            console.log('downloaded:' + f.length)
-            // console.log(f)
-            console.log(res)
+            report('downloaded:' + f.length)
+            // report(f)
+            report(res)
             // resolve(res)
             return res
         })
@@ -176,10 +185,10 @@ module.exports = () => {
     }
 
     var download = post => {
-        console.log('download')
+        report('download')
         return new Promise((resolv, reject) => {
             var addr = `http://i.4cdn.org/${board}/${post.tim}${post.ext}`
-            console.log(addr)
+            report(addr)
             var dest = `/cache/images/${post.tim}${post.ext}`
 
             var options = {
@@ -195,7 +204,7 @@ module.exports = () => {
                     file.write(data)
                 }).on('end', () => {
                     file.end()
-                    console.log('downloaded ' + addr)
+                    report('downloaded ' + addr)
                     resolv({downloaded: addr})
                 })
             })
@@ -205,21 +214,25 @@ module.exports = () => {
 
     module.runScan = b => {
         board = b
-        console.log(dbStr)
+        report(dbStr)
         return mongoClient.connectAsync(dbStr)
         .then(dba => {
             db = dba
-            console.log('connected')
+            report('connected')
             return module.processThreads()
         })
         .then((pt) => {
-            console.log(pt)
+            report(pt)
             return module.processPosts()
         })
         .then((pp) => {
             return db.closeAsync()
         })
 
+    }
+
+    module.setReport = s => {
+        ws = s
     }
 
 

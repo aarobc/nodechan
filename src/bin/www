@@ -19,8 +19,11 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server = http.createServer(app)
 
+// workaround to get express-ws to work
+var socket = require('../routes/socket')(server)
+socket.app.use('/api/scan', socket.router)
 /**
  * Listen on provided port, on all network interfaces.
  */
