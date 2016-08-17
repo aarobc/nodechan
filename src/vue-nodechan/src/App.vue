@@ -154,12 +154,18 @@ export default {
             var socket = new WebSocket('ws://localhost/api/scan')
 
             socket.onopen = event => {
-                socket.send("Here's some text that the server is urgently awaiting!")
+                var start = {board: this.currentBoard, start: true}
+                var send = JSON.stringify(start)
+                socket.send(send)
             }
 
             socket.onmessage = event => {
-                console.log(event.data)
-                socket.close()
+                var data = JSON.parse(event.data)
+                console.log(data.msg)
+                if(data.done){
+                    socket.close()
+                    console.log('done')
+                }
             }
 
         }

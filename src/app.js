@@ -10,7 +10,7 @@ var routes       = require('./routes/index')
 var threads      = require('./routes/threads')
 var posts        = require('./routes/posts')
 var boards       = require('./routes/boards')
-var socket       = require('./routes/socket')
+// var socket       = require('./routes/socket')
 // setup
 var app          = express()
 
@@ -32,7 +32,7 @@ app.use('/', routes);
 app.use('/api/threads', threads);
 app.use('/api/posts', posts);
 app.use('/api/boards', boards);
-app.use('/api/scan', socket);
+// app.use('/api/scan', socket);
 
 
 // catch 404 and forward to error handler
